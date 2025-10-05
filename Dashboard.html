@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Virso Dashboard — Simulated Payments</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg-1:#141e30; --bg-2:#243b55; --card:#2e2e3e; --accent:#00bcd4; --accent-d:#02aab0; --pay:#ff5722;
+    }
+    body{
+      margin:0; font-family:Inter,system-ui,Segoe UI,Roboto,Arial; color:#fff;
+      background: linear-gradient(90deg,var(--bg-1),var(--bg-2));
+      padding:20px; min-height:100vh; position:relative; box-sizing:border-box;
+    }
+    h1{margin:0 0 18px 0; font-size:1.6rem;}
+    .product-grid{display:flex;flex-wrap:wrap;gap:18px;}
+    .product-card{background:var(--card); padding:18px;border-radius:10px;width:300px;box-shadow:0 6px 18px rgba(0,0,0,.45);text-align:center;}
+    .product-card img{width:100%;height:150px;object-fit:cover;border-radius:6px;margin-bottom:10px;}
+    .product-card h2{font-size:1.05rem;margin:4px 0}
+    .product-card p{font-size:.9rem;color:#cfcfcf;margin:6px 0 12px}
+    .product-card button{background:var(--accent);border:none;padding:9px 12px;border-radius:8px;color:#012;cursor:pointer;font-weight:600;margin:6px 4px}
+    .product-card button:hover{background:var(--accent-d)}
+    .cashout-button{display:block;margin:34px auto;padding:12px 18px;background:var(--pay);border:none;border-radius:10px;font-weight:700;cursor:pointer}
+    .cashout-button:hover{filter:brightness(.95)}
+
+    /* cart mini */
+    .cart-mini{position:fixed;left:20px;bottom:20px;background:rgba(0,0,0,.38);padding:10px 12px;border-radius:8px;box-shadow:0 8px 20px rgba(0,0,0,.6)}
+    .cart-mini b{display:block;font-size:.95rem}
+    .clear-cart{display:block;text-align:center;color:#ddd;margin-top:6px;cursor:pointer;font-size:.78rem}
+
+    /* money box */
+    .money-box{position:fixed;right:20px;bottom:20px;background:#0f1112;padding:14px;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.7);width:300px;color:#ddd}
+    .money-box h3{margin:0 0 8px 0;text-align:center;font-weight:600;color:#eee;font-size:.95rem}
+    .money-box label{display:block;font-size:.78rem;color:#aaa;margin-top:10px}
+    .money-box input{width:100%;padding:9px;border-radius:8px;border:none;margin-top:6px;font-size:.95rem;box-sizing:border-box;background:#121315;color:#fff}
+    .money-row{display:flex;gap:8px}
+    .money-row .half{flex:1}
+    .money-actions{display:flex;gap:8px;margin-top:12px;justify-content:center}
+    .btn{padding:8px 10px;border-radius:8px;border:none;font-weight:700;cursor:pointer}
+    .btn-pay{background:var(--accent);color:#012}
+    .btn-pay:hover{background:var(--accent-d)}
+    .btn-clear{background:#222;color:#fff}
+    .balance-display{margin-top:12px;text-align:center;font-size:1.05rem;color:#2bffb0;font-weight:700}
+
+    /* processing modal */
+    .modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:2000}
+    .modal{background:#0b0b0c;padding:20px;border-radius:12px;max-width:420px;width:92%;box-shadow:0 20px 60px rgba(0,0,0,.7);text-align:center;color:#ddd}
+    .spinner{width:56px;height:56px;border-radius:50%;border:6px solid rgba(255,255,255,.08);border-top-color:var(--accent);margin:12px auto;animation:spin 1s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .receipt{background:#0f1213;padding:12px;border-radius:8px;margin-top:12px;text-align:left;font-size:.95rem;color:#ccc}
+    .receipt .row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.03)}
+    .success{color:#6ff0a1;font-weight:700;margin-top:8px}
+
+    /* small responsive */
+    @media (max-width:720px){ .money-box{position:static;width:100%;margin-top:18px} .cart-mini{left:12px;bottom:140px} .product-grid{justify-content:center} }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Welcome</h1>
+  </header>
+
+  <main>
+    <div class="product-grid">
+      <!-- all product cards preserved -->
+      <div class="product-card">
+        <img src="YOUR_IMAGE_URL_FOR_PULSE_1" alt="Virso Pulse 1" />
+        <h2>Virso Pulse 1</h2>
+        <p>Runs Virso OS 2<br>Base Price: $1,500</p>
+        <button onclick="addItem('Pulse 1 - Normal (32GB)', 299)">Normal — 32GB — $299</button>
+        <button onclick="addItem('Pulse 1 - Premium (64GB)', 399)">Premium — 64GB — $399</button>
+        <button onclick="addItem('Pulse 1 - Premium+ (256GB)', 499)">Premium+ — 256GB — $499</button>
+        <button onclick="addItem('Pulse 1 - Mythic (512GB)', 699)">Mythic — 512GB — $699</button>
+        <button onclick="addItem('Pulse 1 - Founder (1TB)', 1199)">Founder — 1TB — $1,199</button>
+        <button onclick="addItem('Pulse 1 - Sovereign (2TB)', 1499)">Sovereign — 2TB — $1,499</button>
+      </div>
+
+      <div class="product-card">
+        <img src="YOUR_IMAGE_URL_FOR_PULSE_2" alt="Virso Pulse 2" />
+        <h2>Virso Pulse 2</h2>
+        <p>Runs Virso OS 3<br>Base Price: $1,530</p>
+        <button onclick="addItem('Pulse 2 - Normal (32GB)', 299)">Normal — 32GB — $299</button>
+        <button onclick="addItem('Pulse 2 - Premium (64GB)', 399)">Premium — 64GB — $399</button>
+        <button onclick="addItem('Pulse 2 - Premium+ (256GB)', 499)">Premium+ — 256GB — $499</button>
+        <button onclick="addItem('Pulse 2 - Mythic (512GB)', 699)">Mythic — 512GB — $699</button>
+        <button onclick="addItem('Pulse 2 - Founder (1TB)', 1199)">Founder — 1TB — $1,199</button>
+        <button onclick="addItem('Pulse 2 - Sovereign (2TB)', 1499)">Sovereign — 2TB — $1,499</button>
+        <button onclick="addItem('Pulse 2 - Platinum (3TB)', 1700)">Platinum — 3TB — $1,700</button>
+      </div>
+
+      <div class="product-card">
+        <img src="https://via.placeholder.com/300x150.png?text=Virso+Nexus+1" alt="Virso Nexus 1" />
+        <h2>Virso Nexus 1</h2>
+        <p>Base Price: $2,300</p>
+        <button onclick="addItem('Nexus 1 - Normal (32GB)', 299)">Normal — 32GB — $299</button>
+        <button onclick="addItem('Nexus 1 - Premium (64GB)', 399)">Premium — 64GB — $399</button>
+        <button onclick="addItem('Nexus 1 - Premium+ (256GB)', 499)">Premium+ — 256GB — $499</button>
+        <button onclick="addItem('Nexus 1 - Mythic (512GB)', 699)">Mythic — 512GB — $699</button>
+        <button onclick="addItem('Nexus 1 - Founder (1TB)', 1199)">Founder — 1TB — $1,199</button>
+        <button onclick="addItem('Nexus 1 - Sovereign (2TB)', 1499)">Sovereign — 2TB — $1,499</button>
+      </div>
+
+      <div class="product-card">
+        <h2>Code USB</h2>
+        <p>8GB USB drive<br>Price: $50</p>
+        <button onclick="addItem('Code USB', 50)">Add to Cart — $50</button>
+      </div>
+
+      <div class="product-card">
+        <img src="https://via.placeholder.com/300x150.png?text=Virso+Card+Basic" alt="Virso Card Basic" />
+        <h2>Virso Card — Basic</h2>
+        <p>Purchase: $12<br>Weekly Fee: $6</p>
+        <button onclick="addItem('Virso Card — Basic', 12)">Buy Basic Card — $12</button>
+      </div>
+
+      <div class="product-card">
+        <img src="https://via.placeholder.com/300x150.png?text=Virso+Card+Normal" alt="Virso Card Normal" />
+        <h2>Virso Card — Normal</h2>
+        <p>Purchase: $50<br>Weekly Fee: $10</p>
+        <button onclick="addItem('Virso Card — Normal', 50)">Buy Normal Card — $50</button>
+      </div>
+
+      <div class="product-card">
+        <img src="https://via.placeholder.com/300x150.png?text=Virso+Card+Premium" alt="Virso Card Premium" />
+        <h2>Virso Card — Premium</h2>
+        <p>Purchase: $100<br>Weekly Fee: $12</p>
+        <button onclick="addItem('Virso Card — Premium', 100)">Buy Premium Card — $100</button>
+      </div>
+    </div>
+
+    <button class="cashout-button" onclick="cashOut()">Cash Out</button>
+  </main>
+
+  <!-- cart mini -->
+  <div class="cart-mini" id="cartMini">
+    <b>Cart</b>
+    <div><span id="cartCount">0</span> items • Total: $<span id="cartTotal">0</span></div>
+    <div class="clear-cart" onclick="clearCart()">Clear Cart</div>
+  </div>
+
+  <!-- payment box -->
+  <div class="money-box" role="region" aria-live="polite">
+    <h3>Add your PayPal or other payment method</h3>
+
+    <label for="cardName">Name on card</label>
+    <input id="cardName" placeholder="Full name" autocomplete="name">
+
+    <label for="cardNumber">Card number</label>
+    <input id="cardNumber" placeholder="1234 5678 9012 3456" maxlength="23" inputmode="numeric" autocomplete="cc-number">
+
+    <div class="money-row">
+      <div class="half">
+        <label for="cardExpiry">Expiry (MM/YY)</label>
+        <input id="cardExpiry" placeholder="MM/YY" maxlength="5" inputmode="numeric" autocomplete="cc-exp">
+      </div>
+      <div class="half">
+        <label for="cardCVV">CVV</label>
+        <input id="cardCVV" placeholder="123" maxlength="4" inputmode="numeric" autocomplete="cc-csc">
+      </div>
+    </div>
+
+    <label for="fundAmount">Amount to add ($)</label>
+    <input id="fundAmount" placeholder="e.g. 299" inputmode="decimal">
+
+    <div class="money-actions">
+      <button class="btn btn-pay" onclick="simulatePayment()">Add Funds</button>
+      <button class="btn btn-clear" onclick="clearPaymentForm()">Clear</button>
+    </div>
+
+    <div class="balance-display">Balance: <span id="balanceDisplay">$0.00</span></div>
+  </div>
+
+  <!-- modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div id="modalTitle" style="font-weight:700;font-size:1.05rem">Processing Payment</div>
+      <div class="spinner" aria-hidden="true"></div>
+      <div id="modalMessage" style="margin-top:8px;color:#cfcfcf">Please wait — securely processing.</div>
+      <div id="receiptContainer" style="display:none"></div>
+    </div>
+  </div>
+
+<script>
+  // state
+  let cart = [];
+  let balance = 0;
+
+  // update cart UI
+  function updateCartUI(){
+    const count = cart.length;
+    const total = cart.reduce((s,i)=>s+i.price,0);
+    document.getElementById('cartCount').textContent = count;
+    document.getElementById('cartTotal').textContent = total.toFixed(2);
+  }
+
+  function addItem(name, price){
+    cart.push({name, price});
+    updateCartUI();
+    // small toast lookalike
+    showToast(`${name} added — $${price}`);
+  }
+
+  function clearCart(){
+    if(!cart.length) return;
+    if(!confirm('Clear all items from the cart?')) return;
+    cart=[];
+    updateCartUI();
+    showToast('Cart cleared');
+  }
+
+  // cashOut flow
+  function cashOut(){
+    if(!cart.length){
+      alert('You have not selected any items yet!');
+      return;
+    }
+    const total = cart.reduce((s,i)=>s+i.price,0);
+    const itemsList = cart.map(i=>`${i.name} — $${i.price}`).join('\n');
+    if(!confirm(`Total needed: $${total}\n\nItems:\n${itemsList}\n\nDo you want to proceed?`)) return;
+
+    if(balance >= total){
+      balance = Math.round((balance - total)*100)/100;
+      document.getElementById('balanceDisplay').textContent = `$${balance.toFixed(2)}`;
+      cart=[];
+      updateCartUI();
+      showReceipt('Purchase successful', total, 'balance-deduct');
+    } else {
+      const need = Math.round((total - balance)*100)/100;
+      if(confirm(`Insufficient balance. You need an additional $${need}. Add funds now?`)){
+        document.getElementById('fundAmount').value = need;
+        document.getElementById('cardNumber').focus();
+      } else {
+        showToast('Cash out cancelled');
+      }
+    }
+  }
+
+  // helper toast — minimal
+  function showToast(msg){
+    const d = document.createElement('div');
+    d.textContent = msg;
+    d.style.position='fixed';
+    d.style.left='50%';
+    d.style.transform='translateX(-50%)';
+    d.style.bottom='120px';
+    d.style.background='rgba(0,0,0,.7)';
+    d.style.padding='10px 14px';
+    d.style.borderRadius='8px';
+    d.style.zIndex='1500';
+    d.style.color='#fff';
+    document.body.appendChild(d);
+    setTimeout(()=>d.style.opacity='0',1700);
+    setTimeout(()=>d.remove(),2200);
+  }
+
+  // relaxed card check: require 12-19 digits only
+  function digitsOnlyLen(s){
+    const d = (s||'').replace(/\D/g,'');
+    return d.length;
+  }
+
+  // expiry check mm/yy future
+  function validExpiry(exp){
+    if(!/^\d{2}\/\d{2}$/.test(exp)) return false;
+    const [mmS,yyS] = exp.split('/');
+    const mm = Number(mmS), yy = Number(yyS);
+    if(mm<1||mm>12) return false;
+    const now = new Date();
+    const curYY = now.getFullYear()%100;
+    const curMM = now.getMonth()+1;
+    if(yy < curYY) return false;
+    if(yy === curYY && mm < curMM) return false;
+    return true;
+  }
+
+  // simulate payment
+  function simulatePayment(){
+    const name = (document.getElementById('cardName').value||'').trim();
+    const numRaw = (document.getElementById('cardNumber').value||'').trim();
+    const expiry = (document.getElementById('cardExpiry').value||'').trim();
+    const cvv = (document.getElementById('cardCVV').value||'').trim();
+    const amountRaw = (document.getElementById('fundAmount').value||'').trim();
+
+    const digitsLen = digitsOnlyLen(numRaw);
+    const amount = parseFloat(amountRaw);
+    if(!name){ alert('Enter name on card'); return; }
+    if(isNaN(amount) || amount <= 0){ alert('Enter valid amount'); return; }
+    if(digitsLen < 12 || digitsLen > 19){ alert('Card number must be 12–19 digits'); return; }
+    if(!validExpiry(expiry)){ alert('Enter a valid future expiry (MM/YY)'); return; }
+    if(!/^\d{3,4}$/.test(cvv)){ alert('Enter a valid CVV'); return; }
+
+    openModal('Processing payment');
+    // realistic delay
+    setTimeout(()=>{
+      closeModal();
+      // update balance client-side only
+      balance = Math.round((balance + amount)*100)/100;
+      document.getElementById('balanceDisplay').textContent = `$${balance.toFixed(2)}`;
+      updateCartUI();
+
+      // masked last4
+      const digits = numRaw.replace(/\D/g,'');
+      const last4 = digits.slice(-4);
+      // optionally "remember" masked card in localStorage
+      try {
+        localStorage.setItem('virso_masked_card', `**** **** **** ${last4}`);
+      } catch(e){ /* ignore storage issues */ }
+
+      showReceipt('Payment accepted', amount, 'payment', last4);
+      clearPaymentForm();
+    }, 900 + Math.random()*800);
+  }
+
+  // modal functions
+  function openModal(msg){
+    const m = document.getElementById('modal');
+    m.style.display='flex';
+    document.getElementById('modalMessage').textContent = msg;
+    document.getElementById('receiptContainer').style.display='none';
+  }
+  function closeModal(){
+    const m = document.getElementById('modal');
+    m.style.display='none';
+  }
+
+  function showReceipt(title, amount, type, last4){
+    openModal(title);
+    const rc = document.getElementById('receiptContainer');
+    rc.style.display='block';
+    rc.innerHTML = `
+      <div class="receipt">
+        <div class="row"><div>Type</div><div>${title}</div></div>
+        <div class="row"><div>Amount</div><div>$${amount.toFixed(2)}</div></div>
+        <div class="row"><div>Time</div><div>${new Date().toLocaleString()}</div></div>
+        ${last4 ? `<div class="row"><div>Card</div><div>**** **** **** ${last4}</div></div>` : ''}
+        <div style="text-align:center" class="success">Success ✔</div>
+      </div>
+    `;
+    // hide modal after short while
+    setTimeout(()=>closeModal(), 2200);
+  }
+
+  function clearPaymentForm(){
+    document.getElementById('cardName').value = '';
+    document.getElementById('cardNumber').value = '';
+    document.getElementById('cardExpiry').value = '';
+    document.getElementById('cardCVV').value = '';
+    document.getElementById('fundAmount').value = '';
+  }
+
+  // formatting helpers (card spacing and expiry)
+  const cardNumberEl = document.getElementById('cardNumber');
+  cardNumberEl.addEventListener('input', (e)=>{
+    let v = e.target.value.replace(/\D/g,'').slice(0,19);
+    v = v.match(/.{1,4}/g)?.join(' ')||v;
+    e.target.value = v;
+  });
+  const cardExpEl = document.getElementById('cardExpiry');
+  cardExpEl.addEventListener('input', (e)=>{
+    let v = e.target.value.replace(/\D/g,'').slice(0,4);
+    if(v.length>2) v = v.slice(0,2)+'/'+v.slice(2);
+    e.target.value = v;
+  });
+
+  // on load: load masked card if any
+  window.addEventListener('load', ()=>{
+    try {
+      const m = localStorage.getItem('virso_masked_card');
+      if(m){
+        // show masked card above inputs for realism
+        const h = document.createElement('div');
+        h.style.fontSize='.85rem'; h.style.color='#bbb'; h.style.textAlign='center'; h.style.marginTop='6px';
+        h.textContent = `Last used card: ${m}`;
+        document.querySelector('.money-box').insertBefore(h, document.querySelector('.money-box').children[1]);
+      }
+    } catch(e){}
+    updateCartUI();
+    document.getElementById('balanceDisplay').textContent = `$${balance.toFixed(2)}`;
+  });
+
+  // allow Enter on amount to trigger payment
+  document.getElementById('fundAmount').addEventListener('keydown', (e)=>{
+    if(e.key === 'Enter') simulatePayment();
+  });
+</script>
+</body>
+</html>
+
+
+
+
