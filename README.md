@@ -1,2 +1,2 @@
-# Virso--Game
+# Virso-Game
 A buying simulator
